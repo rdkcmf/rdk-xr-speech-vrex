@@ -1,0 +1,18 @@
+%language=ANSI-C
+%struct-type
+%includes
+%define lookup-function-name xrsv_ws_request_handler_get
+%{
+#include "xrsv_ws_private.h"
+%}
+struct xrsv_ws_request_handler_s;
+%%
+Mic Status,      xrsv_ws_req_mic_status
+close_mic,       xrsv_ws_req_mic_close
+end_session,     xrsv_ws_req_mic_close
+processing,      xrsv_ws_req_processing
+listening,       xrsv_ws_req_listening
+start_countdown, xrsv_ws_req_countdown
+action,          xrsv_ws_req_action
+sip_call,        xrsv_ws_req_sip_call
+%%

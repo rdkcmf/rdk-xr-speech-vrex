@@ -1,0 +1,18 @@
+%language=ANSI-C
+%struct-type
+%includes
+%define lookup-function-name xrsv_ws_action_handler_get
+%{
+#include "xrsv_ws_private.h"
+%}
+struct xrsv_ws_action_handler_s;
+%%
+cancel_notification, xrsv_ws_act_notification_cancel
+notify,              xrsv_ws_act_notify
+tv volume up,        xrsv_ws_act_tv_volume_up
+tv volume down,      xrsv_ws_act_tv_volume_down
+tv mute on,          xrsv_ws_act_tv_mute_on
+tv mute off,         xrsv_ws_act_tv_mute_off
+tv power on,         xrsv_ws_act_tv_power_on
+tv power off,        xrsv_ws_act_tv_power_off
+%%

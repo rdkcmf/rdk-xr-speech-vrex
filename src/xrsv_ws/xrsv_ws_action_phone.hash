@@ -1,0 +1,13 @@
+%language=ANSI-C
+%struct-type
+%includes
+%define lookup-function-name xrsv_ws_action_phone_handler_get
+%{
+#include "xrsv_ws_private.h"
+%}
+struct xrsv_ws_action_handler_s;
+%%
+phone_start_call,    xrsv_ws_act_phone_call_start
+phone_answer_call,   xrsv_ws_act_phone_call_answer
+phone_ignore_call,   xrsv_ws_act_phone_call_ignore
+%%
