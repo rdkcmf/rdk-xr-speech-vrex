@@ -301,7 +301,7 @@ xrsv_ws_nextgen_object_t xrsv_ws_nextgen_create(const xrsv_ws_nextgen_params_t *
    }
 
    if(params->device_id != NULL) {
-      rc = snprintf(obj->query_element_device_id,     sizeof(obj->query_element_device_id), "deviceId=%s",    params->device_id);
+      rc = snprintf(obj->query_element_device_id,     sizeof(obj->query_element_device_id), "id=%s",    params->device_id);
       if(rc >= sizeof(obj->query_element_device_id)) {
          XLOGD_WARN("truncated device id <%d>", rc);
       }
