@@ -83,19 +83,21 @@ typedef struct {
 /// @brief XRSV_WS_NEXTGEN stream parameter structure
 /// @details The stream parameter data structure is returned in the session begin callback function.
 typedef struct {
-   uint32_t keyword_sample_begin;               ///< The offset in samples from the beginning of the buffered audio to the beginning of the keyword
-   uint32_t keyword_sample_end;                 ///< The offset in samples from the beginning of the buffered audio to the end of the keyword
-   uint16_t keyword_doa;                        ///< The direction of arrival in degrees (0-359)
-   uint16_t keyword_sensitivity;                ///<
-   uint16_t keyword_sensitivity_triggered;      ///<
-   bool     keyword_sensitivity_high_support;   ///<
-   bool     keyword_sensitivity_high_triggered; ///<
-   uint16_t keyword_sensitivity_high;           ///<
-   double   dynamic_gain;                       ///<
-   double   signal_noise_ratio;                 ///<
-   double   linear_confidence;                  ///<
-   int32_t  nonlinear_confidence;               ///<
-   bool     push_to_talk;                       ///< True if the session was started by the user pressing a button
+   uint32_t     keyword_sample_begin;               ///< The offset in samples from the beginning of the buffered audio to the beginning of the keyword
+   uint32_t     keyword_sample_end;                 ///< The offset in samples from the beginning of the buffered audio to the end of the keyword
+   uint16_t     keyword_doa;                        ///< The direction of arrival in degrees (0-359)
+   uint16_t     keyword_sensitivity;                ///<
+   uint16_t     keyword_sensitivity_triggered;      ///<
+   bool         keyword_sensitivity_high_support;   ///<
+   bool         keyword_sensitivity_high_triggered; ///<
+   uint16_t     keyword_sensitivity_high;           ///<
+   double       dynamic_gain;                       ///<
+   double       signal_noise_ratio;                 ///<
+   double       linear_confidence;                  ///<
+   int32_t      nonlinear_confidence;               ///<
+   bool         push_to_talk;                       ///< True if the session was started by the user pressing a button
+   const char * detector_name;                      ///< Name of keyword detector that initiated session, if applicable
+   const char * dsp_name;                           ///< Name of DSP preprocessing in use, if applicable
 } xrsv_ws_nextgen_stream_params_t;
 
 /// @}
