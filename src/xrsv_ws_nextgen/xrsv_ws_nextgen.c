@@ -54,9 +54,9 @@
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW                      "wuw"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_START                "sowuw"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_END                  "eowuw"
+#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING    "dspPreprocessing"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR             "detector"
-#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_KEYWORD_DETECTOR     "keyword_detector"
-#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING    "dsp_preprocessing"
+#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_VENDOR      "vendor"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SENSITIVITY "sensitivity"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN        "gain"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SNR         "signalNoiseRatio"
@@ -588,8 +588,8 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    stream_params.nonlinear_confidence               = 0;
    stream_params.signal_noise_ratio                 = 255.0; // Invalid;
    stream_params.push_to_talk                       = false;
-   stream_params.detector_name                      = (detector_result && detector_result->detector_name) ? detector_result->detector_name : NULL;
-  stream_params.dsp_name                            = (detector_result && detector_result->dsp_name) ? detector_result->dsp_name : NULL;
+   stream_params.detector_name                      = (detector_result && detector_result->detector_name) ? detector_result->detector_name : "unknown";
+   stream_params.dsp_name                           = (detector_result && detector_result->dsp_name) ? detector_result->dsp_name : "unknown";
 
    if(obj->handlers.session_begin != NULL) {
       (*obj->handlers.session_begin)(uuid, src, dst_index, configuration, &stream_params, timestamp, obj->user_data);
@@ -618,10 +618,11 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
       // WUW Object
       rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_START, json_integer(stream_params.keyword_sample_begin));
       rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_END, json_integer(stream_params.keyword_sample_end));
+      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING, json_string(stream_params.dsp_name));
+
       rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR, obj_detector);
       // Detector Object
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_KEYWORD_DETECTOR, json_string(stream_params.detector_name));
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING, json_string(stream_params.dsp_name));
+      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_VENDOR, json_string(stream_params.detector_name));
       rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN, json_real(stream_params.dynamic_gain));
       rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SNR, json_real(stream_params.signal_noise_ratio));
       if(stream_params.nonlinear_confidence > 0) {
