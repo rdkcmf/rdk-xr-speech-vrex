@@ -100,7 +100,7 @@ static bool     xrsv_ws_nextgen_update_json(json_t *obj, const char *key, json_t
 static bool     xrsv_ws_nextgen_update_json_str(json_t *obj, const char *key, const char *value);
 
 static void xrsv_ws_nextgen_handler_ws_source_error(void *data, xrsr_src_t src);
-static void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp);
+static void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in);
 static void xrsv_ws_nextgen_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_nextgen_handler_ws_stream_begin(void *data, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_nextgen_handler_ws_stream_kwd(void *data, const uuid_t uuid, rdkx_timestamp_t *timestamp);
@@ -566,7 +566,7 @@ void xrsv_ws_nextgen_handler_ws_source_error(void *data, xrsr_src_t src) {
    }
 }
 
-void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp) {
+void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in) {
    xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)data;
    if(!xrsv_ws_nextgen_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
@@ -600,6 +600,12 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    json_object_del(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW);
    // End Clear
 
+   if (transcription_in != NULL) {
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb, XRSV_WS_NEXTGEN_JSON_KEY_TEXT, transcription_in ? json_string(transcription_in) : json_string(""));
+   } else {
+      // Make sure this is cleared in case previous session created it.
+      json_object_del(obj->obj_init_stb, XRSV_WS_NEXTGEN_JSON_KEY_TEXT);
+   }
    // Root Object
    uuid_unparse_lower(uuid, uuid_str);
    rc |= json_object_set_new_nocheck(obj->obj_init, XRSV_WS_NEXTGEN_JSON_KEY_TRX, json_string(uuid_str));

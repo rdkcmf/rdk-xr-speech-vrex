@@ -81,7 +81,7 @@ static bool     xrsv_ws_update_init_json_str(xrsv_ws_obj_t *obj, const char *key
 static void     xrsv_ws_update_init_last_command_times(xrsv_ws_obj_t *obj);
 
 static void xrsv_ws_handler_ws_source_error(void *data, xrsr_src_t src);
-static void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp);
+static void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in);
 static void xrsv_ws_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_stream_begin(void *data, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_stream_kwd(void *data, const uuid_t uuid, rdkx_timestamp_t *timestamp);
@@ -535,11 +535,14 @@ void xrsv_ws_handler_ws_source_error(void *data, xrsr_src_t src) {
    }
 }
 
-void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp) {
+void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in) {
    xrsv_ws_obj_t *obj = (xrsv_ws_obj_t *)data;
    if(!xrsv_ws_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
       return;
+   }
+   if (transcription_in != NULL) {
+      XLOGD_ERROR("%s: Voice session by text not supported for this handler.", __FUNCTION__);
    }
    char uuid_str[37] = {'\0'};
    json_t *obj_init = obj->obj_init;

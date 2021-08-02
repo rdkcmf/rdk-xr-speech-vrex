@@ -49,13 +49,14 @@ typedef struct {
    char                 query_element_experience[32];
    char                 query_element_language[32];
    char                 query_element_aspect_ratio[16];
+   char                 query_element_vrex_filters[40];
    void *               user_data;
 } xrsv_http_obj_t;
 
 static void xrsv_http_handler_source_error(xrsv_http_object_t object, xrsr_src_t src);
 static void xrsv_http_handler_connected(xrsv_http_object_t object, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_disconnected(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp);
-static void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp);
+static void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in);
 static void xrsv_http_handler_session_end(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_stream_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_stream_end(xrsv_http_object_t object, const uuid_t uuid, xrsr_stream_stats_t *stats, rdkx_timestamp_t *timestamp);
@@ -303,7 +304,7 @@ void xrsv_http_handler_disconnected(xrsv_http_object_t object, const uuid_t uuid
    }
 }
 
-void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp) {
+void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in) {
    xrsv_http_obj_t *obj = (xrsv_http_obj_t *)object;
    if(!xrsv_http_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
@@ -330,6 +331,14 @@ void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uui
    snprintf(obj->query_element_trx,        sizeof(obj->query_element_trx),   "trx=%s", uuid_str);
    snprintf(obj->query_element_codec,      sizeof(obj->query_element_codec), "codec=%s", codec);
 
+   if (transcription_in != NULL) {
+      // For a text only session, remove SR (speech recognition) from the filter
+      snprintf(obj->query_element_vrex_filters, sizeof(obj->query_element_vrex_filters), "vrexFilters=NLP,EVENT,AR,EXEC");
+   } else {
+      // Leave VREX filters at default
+      obj->query_element_vrex_filters[0] = '\0';
+   }
+
    obj->query_strs[0] = obj->query_element_app_id;
    obj->query_strs[1] = obj->query_element_device_id;
    obj->query_strs[2] = obj->query_element_partner_id;
@@ -338,8 +347,10 @@ void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uui
    obj->query_strs[5] = obj->query_element_aspect_ratio;
    obj->query_strs[6] = obj->query_element_trx;
    obj->query_strs[7] = obj->query_element_codec;
+   obj->query_strs[8] = obj->query_element_vrex_filters;
 
-   uint32_t i = 8;
+
+   uint32_t i = 9;
    if(query_strs_app != NULL) { // application defined query string params
       while(*query_strs_app != NULL) {
          if(i >= XRSV_HTTP_QUERY_STRING_QTY_MAX) {
