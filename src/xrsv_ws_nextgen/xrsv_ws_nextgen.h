@@ -95,6 +95,7 @@ typedef struct {
    double       signal_noise_ratio;                 ///<
    double       linear_confidence;                  ///<
    int32_t      nonlinear_confidence;               ///<
+   uint16_t     par_eos_timeout;
    bool         push_to_talk;                       ///< True if the session was started by the user pressing a button
    const char * detector_name;                      ///< Name of keyword detector that initiated session, if applicable
    const char * dsp_name;                           ///< Name of DSP preprocessing in use, if applicable

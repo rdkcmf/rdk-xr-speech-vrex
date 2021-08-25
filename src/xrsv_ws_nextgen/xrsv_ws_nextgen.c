@@ -64,6 +64,7 @@
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_LINEAR      "keywordConfidenceLinear"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_DEVICE_SW_VERSION        "deviceSwVersion"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_STB_SW_VERSION           "stbSwVersion"
+#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT                  "timeout"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_LANG                           "language"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_MAC                            "mac"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_EXPERIENCE                     "experience"
@@ -587,6 +588,7 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    stream_params.linear_confidence                  = 0.0;
    stream_params.nonlinear_confidence               = 0;
    stream_params.signal_noise_ratio                 = 255.0; // Invalid;
+   stream_params.par_eos_timeout                    = 0;
    stream_params.push_to_talk                       = false;
    stream_params.detector_name                      = (detector_result && detector_result->detector_name) ? detector_result->detector_name : "unknown";
    stream_params.dsp_name                           = (detector_result && detector_result->dsp_name) ? detector_result->dsp_name : "unknown";
@@ -610,6 +612,12 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    uuid_unparse_lower(uuid, uuid_str);
    rc |= json_object_set_new_nocheck(obj->obj_init, XRSV_WS_NEXTGEN_JSON_KEY_TRX, json_string(uuid_str));
    // End Root Object
+
+   if (stream_params.par_eos_timeout > 0) {
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT, json_integer(stream_params.par_eos_timeout));
+   } else {
+      json_object_del(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT);
+   }
 
    // Audio Object
    rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER_TIME, json_integer(xrsv_ws_nextgen_time_get()));
