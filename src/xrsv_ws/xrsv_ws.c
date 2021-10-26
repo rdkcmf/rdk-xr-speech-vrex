@@ -86,7 +86,7 @@ static void xrsv_ws_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_s
 static void xrsv_ws_handler_ws_stream_begin(void *data, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_stream_kwd(void *data, const uuid_t uuid, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_stream_end(void *data, const uuid_t uuid, xrsr_stream_stats_t *stats, rdkx_timestamp_t *timestamp);
-static void xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
+static bool xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp);
 static bool xrsv_ws_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length);
 
@@ -680,11 +680,11 @@ void xrsv_ws_handler_ws_stream_end(void *data, const uuid_t uuid, xrsr_stream_st
    }
 }
 
-void xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp) {
+bool xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp) {
    xrsv_ws_obj_t *obj = (xrsv_ws_obj_t *)data;
    if(!xrsv_ws_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
-      return;
+      return false;
    }
    if(obj->handlers.connected != NULL) {
       (*obj->handlers.connected)(uuid, timestamp, obj->user_data);
@@ -701,7 +701,7 @@ void xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_se
    
    if(buffer == NULL || length == 0) {
       XLOGD_ERROR("invalid message");
-      return;
+      return false;
    }
    XLOGD_INFO("msg init <%s>", buffer);
    
@@ -716,6 +716,7 @@ void xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_se
       rdkx_timestamp_get_realtime(&ts_sent_init);
       (*obj->handlers.sent_init)(uuid, &ts_sent_init, obj->user_data);
    }
+   return true;
 }
 
 void xrsv_ws_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp) {

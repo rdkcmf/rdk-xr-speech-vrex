@@ -54,7 +54,7 @@ typedef struct {
 } xrsv_http_obj_t;
 
 static void xrsv_http_handler_source_error(xrsv_http_object_t object, xrsr_src_t src);
-static void xrsv_http_handler_connected(xrsv_http_object_t object, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
+static bool xrsv_http_handler_connected(xrsv_http_object_t object, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_disconnected(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in);
 static void xrsv_http_handler_session_end(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
@@ -277,16 +277,17 @@ void xrsv_http_handler_source_error(xrsv_http_object_t object, xrsr_src_t src) {
    }
 }
 
-void xrsv_http_handler_connected(xrsv_http_object_t object, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp) {
+bool xrsv_http_handler_connected(xrsv_http_object_t object, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp) {
    xrsv_http_obj_t *obj = (xrsv_http_obj_t *)object;
    if(!xrsv_http_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
-      return;
+      return false;
    }
    if(obj->handlers.connected != NULL) {
       (*obj->handlers.connected)(uuid, timestamp, obj->user_data);
    }
    XLOGD_INFO("");
+   return true;
 }
 
 void xrsv_http_handler_disconnected(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp) {
