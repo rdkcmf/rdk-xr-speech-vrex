@@ -51,6 +51,7 @@
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER                  "triggeredBy"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER_TIME             "triggeredEpochTime"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_MODEL                    "audioModel"
+#define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_DYNAMIC_GAIN             "gain"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW                      "wuw"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_START                "sowuw"
 #define XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_END                  "eowuw"
@@ -584,10 +585,11 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    stream_params.keyword_sensitivity_high           = 0;
    stream_params.keyword_sensitivity_high_support   = false;
    stream_params.keyword_sensitivity_high_triggered = false;
-   stream_params.dynamic_gain                       = 0.0;
+   stream_params.keyword_gain                       = (detector_result != NULL ? detector_result->kwd_gain : 0.0);
+   stream_params.dynamic_gain                       = (detector_result != NULL ? detector_result->dynamic_gain : 0.0);
    stream_params.linear_confidence                  = 0.0;
    stream_params.nonlinear_confidence               = 0;
-   stream_params.signal_noise_ratio                 = 255.0; // Invalid;
+   stream_params.signal_noise_ratio                 = (detector_result != NULL ? detector_result->snr : 255.0); // if NULL 255.0 is invalid value;
    stream_params.par_eos_timeout                    = 0;
    stream_params.push_to_talk                       = false;
    stream_params.detector_name                      = (detector_result && detector_result->detector_name) ? detector_result->detector_name : "unknown";
@@ -621,6 +623,7 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
 
    // Audio Object
    rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER_TIME, json_integer(xrsv_ws_nextgen_time_get()));
+   rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_DYNAMIC_GAIN, json_real(stream_params.dynamic_gain));
    if(configuration->ws.user_initiated || stream_params.push_to_talk) {
       rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER, json_string(XRSV_WS_NEXTGEN_JSON_ELEMENT_AUDIO_TRIGGER_PTT));
    } else {
@@ -637,7 +640,7 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
       rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR, obj_detector);
       // Detector Object
       rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_VENDOR, json_string(stream_params.detector_name));
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN, json_real(stream_params.dynamic_gain));
+      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN, json_real(stream_params.keyword_gain));
       rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SNR, json_real(stream_params.signal_noise_ratio));
       if(stream_params.nonlinear_confidence > 0) {
          rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_NONLINEAR, json_integer(stream_params.nonlinear_confidence));

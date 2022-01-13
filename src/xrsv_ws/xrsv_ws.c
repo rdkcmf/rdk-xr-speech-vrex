@@ -54,6 +54,7 @@
 #define XRSV_WS_JSON_KEY_SOWUW                         "SOWUW"
 #define XRSV_WS_JSON_KEY_EOWUW                         "EOWUW"
 #define XRSV_WS_JSON_KEY_DOA                           "DOA"
+#define XRSV_WS_JSON_KEY_DYNAMIC_GAIN                  "gain"
 #define XRSV_WS_JSON_KEY_KW_CONFIDENCE_LINEAR          "keywordConfidenceLinear"
 #define XRSV_WS_JSON_KEY_KW_CONFIDENCE_NONLINEAR       "keywordConfidenceNonLinear"
 #define XRSV_WS_JSON_KEY_KW_SENSITIVITY                "keywordSensitivity"
@@ -64,7 +65,7 @@
 #define XRSV_WS_JSON_KEY_LAST_CMD_TRANSCRIPTION        "lastCommandTranscription"
 #define XRSV_WS_JSON_KEY_FOLLOW_UP                     "isFollowUpCommand"
 #define XRSV_WS_JSON_KEY_SIGNAL_NOISE_RATIO            "signalNoiseRatio"
-#define XRSV_WS_JSON_KEY_GAIN                          "gain"
+#define XRSV_WS_JSON_KEY_KW_GAIN                       "keywordGain"
 #define XRSV_WS_JSON_KEY_TRX                           "trx"
 #define XRSV_WS_JSON_KEY_FOLLOW_UP                     "isFollowUpCommand"
 
@@ -556,10 +557,11 @@ void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t 
    stream_params.keyword_sensitivity_high           = 0;
    stream_params.keyword_sensitivity_high_support   = false;
    stream_params.keyword_sensitivity_high_triggered = false;
-   stream_params.dynamic_gain                       = 0.0;
+   stream_params.keyword_gain                       = (detector_result != NULL ? detector_result->kwd_gain : 0.0);
+   stream_params.dynamic_gain                       = (detector_result != NULL ? detector_result->dynamic_gain : 0.0);
    stream_params.linear_confidence                  = 0.0;
    stream_params.nonlinear_confidence               = 0;
-   stream_params.signal_noise_ratio                 = 255.0; // Invalid;
+   stream_params.signal_noise_ratio                 = (detector_result != NULL ? detector_result->snr : 255.0); // if NULL 255.0 is invalid value;
    stream_params.push_to_talk                       = false;
 
    if(obj->handlers.session_begin != NULL) {
@@ -571,7 +573,7 @@ void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t 
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_SOWUW, json_integer(stream_params.keyword_sample_begin));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_EOWUW, json_integer(stream_params.keyword_sample_end));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_DOA,   json_integer(stream_params.keyword_doa));
-   rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_GAIN,  json_real(stream_params.dynamic_gain));
+   rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_DYNAMIC_GAIN,  json_real(stream_params.dynamic_gain));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_SIGNAL_NOISE_RATIO, json_real(stream_params.signal_noise_ratio));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_KW_SENSITIVITY, json_integer(stream_params.keyword_sensitivity));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_KW_SENSITIVITY_TRIGGERED, (stream_params.keyword_sensitivity_triggered ? json_true() : json_false()));
@@ -581,6 +583,7 @@ void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t 
    }
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_KW_CONFIDENCE_LINEAR, json_real(stream_params.linear_confidence));
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_KW_CONFIDENCE_NONLINEAR, json_integer(stream_params.nonlinear_confidence));
+   rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_KW_GAIN,  json_real(stream_params.keyword_gain));
    uuid_unparse_lower(uuid, uuid_str);
    rc |= json_object_set_new_nocheck(obj_init, XRSV_WS_JSON_KEY_TRX,   json_string(uuid_str));
 

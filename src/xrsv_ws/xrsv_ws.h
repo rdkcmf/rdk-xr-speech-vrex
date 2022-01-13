@@ -99,7 +99,8 @@ typedef struct {
    bool     keyword_sensitivity_high_support;   ///<
    bool     keyword_sensitivity_high_triggered; ///<
    uint16_t keyword_sensitivity_high;           ///<
-   double   dynamic_gain;                       ///<
+   double   keyword_gain;                       ///< The gain applied to the audio at the input of the keyword detector
+   double   dynamic_gain;                       ///< The gain applied to the streamed audio
    double   signal_noise_ratio;                 ///<
    double   linear_confidence;                  ///<
    int32_t  nonlinear_confidence;               ///<
