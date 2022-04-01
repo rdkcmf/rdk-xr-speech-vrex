@@ -57,7 +57,7 @@ static void xrsv_http_handler_session_begin(xrsv_http_object_t object, const uui
 static void xrsv_http_handler_session_end(xrsv_http_object_t object, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_stream_begin(xrsv_http_object_t object, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_http_handler_stream_end(xrsv_http_object_t object, const uuid_t uuid, xrsr_stream_stats_t *stats, rdkx_timestamp_t *timestamp);
-static bool xrsv_http_handler_recv_msg(xrsv_http_object_t object, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length);
+static bool xrsv_http_handler_recv_msg(xrsv_http_object_t object, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event);
 
 bool xrsv_http_object_is_valid(xrsv_http_obj_t *obj) {
    if(obj != NULL && obj->identifier == XRSV_HTTP_IDENTIFIER) {
@@ -386,7 +386,7 @@ void xrsv_http_handler_stream_end(xrsv_http_object_t object, const uuid_t uuid, 
    }
 }
 
-bool xrsv_http_handler_recv_msg(xrsv_http_object_t object, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length) {
+bool xrsv_http_handler_recv_msg(xrsv_http_object_t object, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event) {
    xrsv_http_obj_t *obj = (xrsv_http_obj_t *)object;
    if(!xrsv_http_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");

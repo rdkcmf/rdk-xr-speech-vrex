@@ -110,7 +110,8 @@ static void xrsv_ws_nextgen_handler_ws_stream_kwd(void *data, const uuid_t uuid,
 static void xrsv_ws_nextgen_handler_ws_stream_end(void *data, const uuid_t uuid, xrsr_stream_stats_t *stats, rdkx_timestamp_t *timestamp);
 static bool xrsv_ws_nextgen_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_nextgen_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp);
-static bool xrsv_ws_nextgen_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length);
+static bool xrsv_ws_nextgen_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event);
+
 
 bool xrsv_ws_nextgen_object_is_valid(xrsv_ws_nextgen_obj_t *obj) {
    if(obj != NULL && obj->identifier == XRSV_WS_NEXTGEN_IDENTIFIER) {
@@ -820,7 +821,7 @@ void xrsv_ws_nextgen_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr
    }
 }
 
-bool xrsv_ws_nextgen_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length) {
+bool xrsv_ws_nextgen_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event) {
    xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)data;
    if(!xrsv_ws_nextgen_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
@@ -842,6 +843,15 @@ bool xrsv_ws_nextgen_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const
    }
    bool retval = xrsv_ws_nextgen_msg_decode(obj, obj_json);
    json_decref(obj_json);
+
+   if(recv_event == NULL) {
+      XLOGD_ERROR("null event pointer");
+      retval = false;
+   } else {
+      *recv_event = obj->recv_event;
+   }
+   obj->recv_event = XRSR_RECV_EVENT_NONE;
+
    return(retval);
 }
 
@@ -1014,7 +1024,6 @@ bool xrsv_ws_nextgen_msgtype_response_vrex(xrsv_ws_nextgen_obj_t *obj, json_t *o
 }
 
 bool xrsv_ws_nextgen_msgtype_wuw_verification(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json) {
-   XLOGD_INFO("");
    if(obj->handlers.wuw_verification != NULL) {
       // Get Passed
       bool passed        = true;
@@ -1038,6 +1047,27 @@ bool xrsv_ws_nextgen_msgtype_wuw_verification(xrsv_ws_nextgen_obj_t *obj, json_t
       obj->handlers.wuw_verification(passed, confidence, obj->user_data);
    }
    return(false);
+}
+
+bool xrsv_ws_nextgen_msgtype_server_stream_end(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json) {
+   int reason         = -1;
+   json_t *obj_reason = NULL;
+
+   if(!xrsv_ws_nextgen_object_is_valid(obj)) {
+      XLOGD_ERROR("invalid object");
+      return(false);
+   }
+
+   obj_reason = json_object_get(obj_json, XRSV_WS_NEXTGEN_JSON_KEY_REASON);
+   if(obj_reason == NULL || !json_is_integer(obj_reason)) {
+      XLOGD_ERROR("failed to get stream end reason");
+      return false;
+   }
+
+   reason = json_integer_value(obj_reason);
+   obj->recv_event = (reason == XRSV_STREAM_END_END_OF_SPEECH ? XRSR_RECV_EVENT_EOS_SERVER : XRSR_RECV_EVENT_DISCONNECT_REMOTE);
+
+   return true;
 }
 
 bool xrsv_ws_nextgen_msgtype_tv_control(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json) {

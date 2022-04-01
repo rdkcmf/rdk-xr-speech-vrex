@@ -49,6 +49,18 @@ typedef enum {
    XRSV_RESULT_INVALID = 2, ///< Invalid return code
 } xrsv_result_t;
 
+/// @brief VREX endOfStream results
+/// @details The
+typedef enum {
+   XRSV_STREAM_END_END_OF_SPEECH    = 0, ///< VREX returned end of speech
+   XRSV_STREAM_END_END_OF_STREAM    = 1, ///< VREX returned end of stream
+   XRSV_STREAM_END_TIMEOUT          = 2, ///< VREX returned stream timeout
+   XRSV_STREAM_END_USER_INTERUPTED  = 3, ///< VREX returned User Interrupted
+   XRSV_STREAM_END_MAX_LENGTH       = 4, ///< VREX returned max stream length reached
+   XRSV_STREAM_END_INTERNAL_ERROR   = 5, ///< VREX returned Internal Error
+   XRSV_STREAM_END_INVALID          = 6, ///< VREX returned Unknown
+} xrsv_vrex_result_t;
+
 /// @}
 
 #ifdef __cplusplus

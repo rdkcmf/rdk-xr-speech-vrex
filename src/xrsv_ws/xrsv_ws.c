@@ -90,7 +90,7 @@ static void xrsv_ws_handler_ws_stream_kwd(void *data, const uuid_t uuid, rdkx_ti
 static void xrsv_ws_handler_ws_stream_end(void *data, const uuid_t uuid, xrsr_stream_stats_t *stats, rdkx_timestamp_t *timestamp);
 static bool xrsv_ws_handler_ws_connected(void *data, const uuid_t uuid, xrsr_handler_send_t send, void *param, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr_session_end_reason_t reason, bool retry, bool *detect_resume, rdkx_timestamp_t *timestamp);
-static bool xrsv_ws_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length);
+static bool xrsv_ws_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event);
 
 bool xrsv_ws_object_is_valid(xrsv_ws_obj_t *obj) {
    if(obj != NULL && obj->identifier == XRSV_WS_IDENTIFIER) {
@@ -748,7 +748,7 @@ void xrsv_ws_handler_ws_disconnected(void *data, const uuid_t uuid, xrsr_session
    }
 }
 
-bool xrsv_ws_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length) {
+bool xrsv_ws_handler_ws_recv_msg(void *data, xrsr_recv_msg_t type, const uint8_t *buffer, uint32_t length, xrsr_recv_event_t *recv_event) {
    xrsv_ws_obj_t *obj = (xrsv_ws_obj_t *)data;
    if(!xrsv_ws_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
