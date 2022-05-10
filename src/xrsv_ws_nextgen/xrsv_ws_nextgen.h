@@ -88,18 +88,18 @@ typedef struct {
    uint16_t     keyword_doa;                        ///< The direction of arrival in degrees (0-359)
    uint16_t     keyword_sensitivity;                ///<
    uint16_t     keyword_sensitivity_triggered;      ///<
+   uint16_t     keyword_sensitivity_high;           ///<
    bool         keyword_sensitivity_high_support;   ///<
    bool         keyword_sensitivity_high_triggered; ///<
-   uint16_t     keyword_sensitivity_high;           ///<
    double       keyword_gain;                       ///< The gain applied to the audio at the input of the keyword detector
    double       dynamic_gain;                       ///< The gain applied to the streamed audio
    double       signal_noise_ratio;                 ///<
    double       linear_confidence;                  ///<
    int32_t      nonlinear_confidence;               ///<
-   uint16_t     par_eos_timeout;
    bool         push_to_talk;                       ///< True if the session was started by the user pressing a button
    const char * detector_name;                      ///< Name of keyword detector that initiated session, if applicable
    const char * dsp_name;                           ///< Name of DSP preprocessing in use, if applicable
+   uint16_t     par_eos_timeout;
 } xrsv_ws_nextgen_stream_params_t;
 
 /// @}
@@ -121,7 +121,7 @@ typedef void * xrsv_ws_nextgen_object_t;
 /// @param[in] stream_params parameters which describe the stream
 /// @param[in] user_data     the data set by the user
 /// @return The function has no return value.
-typedef void (*xrsv_ws_nextgen_handler_session_begin_t)(const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_session_configuration_t *configuration, xrsv_ws_nextgen_stream_params_t *stream_params, rdkx_timestamp_t *timestamp, void *user_data);
+typedef void (*xrsv_ws_nextgen_handler_session_begin_t)(const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_session_config_out_t *configuration, xrsv_ws_nextgen_stream_params_t *stream_params, rdkx_timestamp_t *timestamp, void *user_data);
 
 /// @brief XRSV_WS_NEXTGEN session end handler
 /// @details Function type to handle session end events from the speech router.

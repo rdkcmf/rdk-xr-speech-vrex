@@ -102,7 +102,8 @@ static bool     xrsv_ws_nextgen_update_json(json_t *obj, const char *key, json_t
 static bool     xrsv_ws_nextgen_update_json_str(json_t *obj, const char *key, const char *value);
 
 static void xrsv_ws_nextgen_handler_ws_source_error(void *data, xrsr_src_t src);
-static void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in);
+static void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_config_out_t *config_out, xrsr_session_config_in_t *config_in, rdkx_timestamp_t *timestamp, const char *transcription_in);
+static void xrsv_ws_nextgen_handler_ws_session_config(void *data, const uuid_t uuid, xrsr_session_config_in_t *config_in);
 static void xrsv_ws_nextgen_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_nextgen_handler_ws_stream_begin(void *data, const uuid_t uuid, xrsr_src_t src, rdkx_timestamp_t *timestamp);
 static void xrsv_ws_nextgen_handler_ws_stream_kwd(void *data, const uuid_t uuid, rdkx_timestamp_t *timestamp);
@@ -324,16 +325,17 @@ bool xrsv_ws_nextgen_handlers(xrsv_ws_nextgen_object_t object, const xrsv_ws_nex
    }
 
    bool ret = true;
-   handlers_out->data          = obj;
-   handlers_out->source_error  = xrsv_ws_nextgen_handler_ws_source_error;
-   handlers_out->session_begin = xrsv_ws_nextgen_handler_ws_session_begin;
-   handlers_out->session_end   = xrsv_ws_nextgen_handler_ws_session_end;
-   handlers_out->stream_begin  = xrsv_ws_nextgen_handler_ws_stream_begin;
-   handlers_out->stream_kwd    = xrsv_ws_nextgen_handler_ws_stream_kwd;
-   handlers_out->stream_end    = xrsv_ws_nextgen_handler_ws_stream_end;
-   handlers_out->connected     = xrsv_ws_nextgen_handler_ws_connected;
-   handlers_out->disconnected  = xrsv_ws_nextgen_handler_ws_disconnected;
-   handlers_out->recv_msg      = xrsv_ws_nextgen_handler_ws_recv_msg;
+   handlers_out->data           = obj;
+   handlers_out->source_error   = xrsv_ws_nextgen_handler_ws_source_error;
+   handlers_out->session_begin  = xrsv_ws_nextgen_handler_ws_session_begin;
+   handlers_out->session_config = xrsv_ws_nextgen_handler_ws_session_config;
+   handlers_out->session_end    = xrsv_ws_nextgen_handler_ws_session_end;
+   handlers_out->stream_begin   = xrsv_ws_nextgen_handler_ws_stream_begin;
+   handlers_out->stream_kwd     = xrsv_ws_nextgen_handler_ws_stream_kwd;
+   handlers_out->stream_end     = xrsv_ws_nextgen_handler_ws_stream_end;
+   handlers_out->connected      = xrsv_ws_nextgen_handler_ws_connected;
+   handlers_out->disconnected   = xrsv_ws_nextgen_handler_ws_disconnected;
+   handlers_out->recv_msg       = xrsv_ws_nextgen_handler_ws_recv_msg;
 
    obj->handlers = *handlers_in;
    return(ret);
@@ -568,7 +570,7 @@ void xrsv_ws_nextgen_handler_ws_source_error(void *data, xrsr_src_t src) {
    }
 }
 
-void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_configuration_t *configuration, rdkx_timestamp_t *timestamp, const char *transcription_in) {
+void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_keyword_detector_result_t *detector_result, xrsr_session_config_out_t *config_out, xrsr_session_config_in_t *config_in, rdkx_timestamp_t *timestamp, const char *transcription_in) {
    xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)data;
    if(!xrsv_ws_nextgen_object_is_valid(obj)) {
       XLOGD_ERROR("invalid object");
@@ -577,28 +579,31 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    char uuid_str[37] = {'\0'};
    int rc = 0;
    xrsv_ws_nextgen_stream_params_t stream_params;
-   stream_params.keyword_sample_begin               = (detector_result != NULL ? detector_result->offset_kwd_begin - detector_result->offset_buf_begin : 0);
-   stream_params.keyword_sample_end                 = (detector_result != NULL ? detector_result->offset_kwd_end   - detector_result->offset_buf_begin : 0);
-   stream_params.keyword_doa                        = (detector_result != NULL ? detector_result->doa : 0);
-   stream_params.keyword_sensitivity                = 0;
-   stream_params.keyword_sensitivity_triggered      = false;
-   stream_params.keyword_sensitivity_high           = 0;
-   stream_params.keyword_sensitivity_high_support   = false;
-   stream_params.keyword_sensitivity_high_triggered = false;
-   stream_params.keyword_gain                       = (detector_result != NULL ? detector_result->kwd_gain : 0.0);
-   stream_params.dynamic_gain                       = (detector_result != NULL ? detector_result->dynamic_gain : 0.0);
-   stream_params.linear_confidence                  = 0.0;
-   stream_params.nonlinear_confidence               = 0;
-   stream_params.signal_noise_ratio                 = (detector_result != NULL ? detector_result->snr : 255.0); // if NULL 255.0 is invalid value;
-   stream_params.par_eos_timeout                    = 0;
-   stream_params.push_to_talk                       = false;
-   stream_params.detector_name                      = (detector_result && detector_result->detector_name) ? detector_result->detector_name : "unknown";
-   stream_params.dsp_name                           = (detector_result && detector_result->dsp_name) ? detector_result->dsp_name : "unknown";
+   if(detector_result != NULL) {
+      stream_params.keyword_sample_begin               = detector_result->offset_kwd_begin - detector_result->offset_buf_begin;
+      stream_params.keyword_sample_end                 = detector_result->offset_kwd_end   - detector_result->offset_buf_begin;
+      stream_params.keyword_doa                        = detector_result->doa;
+      stream_params.keyword_sensitivity                = 0;
+      stream_params.keyword_sensitivity_triggered      = false;
+      stream_params.keyword_sensitivity_high           = 0;
+      stream_params.keyword_sensitivity_high_support   = false;
+      stream_params.keyword_sensitivity_high_triggered = false;
+      stream_params.keyword_gain                       = detector_result->kwd_gain;
+      stream_params.dynamic_gain                       = detector_result->dynamic_gain;
+      stream_params.linear_confidence                  = 0.0;
+      stream_params.nonlinear_confidence               = 0;
+      stream_params.signal_noise_ratio                 = detector_result->snr; // if NULL 255.0 is invalid value;
+      stream_params.par_eos_timeout                    = 0;
+      stream_params.push_to_talk                       = false;
+      stream_params.detector_name                      = (detector_result->detector_name) ? detector_result->detector_name : "unknown";
+      stream_params.dsp_name                           = (detector_result->dsp_name)      ? detector_result->dsp_name      : "unknown";
+   }
+
+   obj->user_initiated = config_out->user_initiated;
 
    if(obj->handlers.session_begin != NULL) {
-      (*obj->handlers.session_begin)(uuid, src, dst_index, configuration, &stream_params, timestamp, obj->user_data);
+      (*obj->handlers.session_begin)(uuid, src, dst_index, config_out, (detector_result == NULL) ? NULL : &stream_params, timestamp, obj->user_data);
    }
-   const char **query_strs_app = configuration->ws.query_strs;
 
    // Clear previous audio data
    json_object_del(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW);
@@ -615,44 +620,6 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    rc |= json_object_set_new_nocheck(obj->obj_init, XRSV_WS_NEXTGEN_JSON_KEY_TRX, json_string(uuid_str));
    // End Root Object
 
-   if (stream_params.par_eos_timeout > 0) {
-      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT, json_integer(stream_params.par_eos_timeout));
-   } else {
-      json_object_del(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT);
-   }
-
-   // Audio Object
-   rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER_TIME, json_integer(xrsv_ws_nextgen_time_get()));
-   rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_DYNAMIC_GAIN, json_real(stream_params.dynamic_gain));
-   if(configuration->ws.user_initiated || stream_params.push_to_talk) {
-      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER, json_string(XRSV_WS_NEXTGEN_JSON_ELEMENT_AUDIO_TRIGGER_PTT));
-   } else {
-      json_t *obj_wuw      = json_object();
-      json_t *obj_detector = json_object();
-      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER, json_string(XRSV_WS_NEXTGEN_JSON_ELEMENT_AUDIO_TRIGGER_WUW));
-      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW, obj_wuw);
-
-      // WUW Object
-      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_START, json_integer(stream_params.keyword_sample_begin));
-      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_END, json_integer(stream_params.keyword_sample_end));
-      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING, json_string(stream_params.dsp_name));
-
-      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR, obj_detector);
-      // Detector Object
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_VENDOR, json_string(stream_params.detector_name));
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN, json_real(stream_params.keyword_gain));
-      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SNR, json_real(stream_params.signal_noise_ratio));
-      if(stream_params.nonlinear_confidence > 0) {
-         rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_NONLINEAR, json_integer(stream_params.nonlinear_confidence));
-      }
-      if(stream_params.linear_confidence > 0) {
-         rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_LINEAR, json_real(stream_params.linear_confidence));
-      }
-      // End Detector Object
-      // End WUW Object
-   }
-   // End Audio Object
-
    // EOS object
    rc |= json_object_set_new_nocheck(obj->obj_stream_end, XRSV_WS_NEXTGEN_JSON_KEY_TRX, json_string(uuid_str));
    // End EOS object
@@ -665,29 +632,72 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    snprintf(obj->query_element_trx, sizeof(obj->query_element_trx), "trx=%s", uuid_str);
 
    uint32_t i = 0;
-   obj->query_strs[i] = obj->query_element_version;
+   config_in->ws.query_strs[i] = obj->query_element_version;
    i++;
    if(obj->query_element_device_id[0] != '\0') {
-      obj->query_strs[i] = obj->query_element_device_id;
+      config_in->ws.query_strs[i] = obj->query_element_device_id;
       i++;
    }
-   obj->query_strs[i] = obj->query_element_trx;
+   config_in->ws.query_strs[i] = obj->query_element_trx;
    i++;
 
-   if(query_strs_app != NULL) { // application defined query string params
-      while(*query_strs_app != NULL) {
-         if(i >= XRSV_WS_NEXTGEN_QUERY_STRING_QTY_MAX) {
-            XLOGD_WARN("maximum query string elements reached");
-            break;
-         }
-         obj->query_strs[i++] = *query_strs_app;
-         query_strs_app++;
-      }
+   config_in->ws.query_strs[i] = NULL;
+}
+
+void xrsv_ws_nextgen_handler_ws_session_config(void *data, const uuid_t uuid, xrsr_session_config_in_t *config_in) {
+   xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)data;
+   int rc = 0;
+
+   if(config_in == NULL || config_in->ws.app_config == NULL) {
+      XLOGD_ERROR("invalid stream params <%p>", config_in);
+      return;
    }
 
-   obj->query_strs[i] = NULL;
+   xrsv_ws_nextgen_stream_params_t *stream_params = (xrsv_ws_nextgen_stream_params_t *)config_in->ws.app_config;
 
-   configuration->ws.query_strs = obj->query_strs;
+   if (stream_params->par_eos_timeout > 0) {
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT, json_integer(stream_params->par_eos_timeout));
+   } else {
+      json_object_del(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TIMEOUT);
+   }
+
+   // Audio Object
+   rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER_TIME, json_integer(xrsv_ws_nextgen_time_get()));
+   if(obj->user_initiated || stream_params->push_to_talk) {
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER, json_string(XRSV_WS_NEXTGEN_JSON_ELEMENT_AUDIO_TRIGGER_PTT));
+   } else {
+      json_t *obj_wuw      = json_object();
+      json_t *obj_detector = json_object();
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_DYNAMIC_GAIN, json_real(stream_params->dynamic_gain));
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_TRIGGER, json_string(XRSV_WS_NEXTGEN_JSON_ELEMENT_AUDIO_TRIGGER_WUW));
+      rc |= json_object_set_new_nocheck(obj->obj_init_stb_audio, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW, obj_wuw);
+
+      // WUW Object
+      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_START, json_integer(stream_params->keyword_sample_begin));
+      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_END, json_integer(stream_params->keyword_sample_end));
+      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DSP_PREPROCESSING, json_string(stream_params->dsp_name));
+
+      rc |= json_object_set_new_nocheck(obj_wuw, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR, obj_detector);
+      // Detector Object
+      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_VENDOR, json_string(stream_params->detector_name));
+      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_GAIN, json_real(stream_params->keyword_gain));
+      rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_SNR, json_real(stream_params->signal_noise_ratio));
+      if(stream_params->nonlinear_confidence > 0) {
+         rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_NONLINEAR, json_integer(stream_params->nonlinear_confidence));
+      }
+      if(stream_params->linear_confidence > 0) {
+         rc |= json_object_set_new_nocheck(obj_detector, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_AUDIO_WUW_DETECTOR_LINEAR, json_real(stream_params->linear_confidence));
+      }
+      // End Detector Object
+      // End WUW Object
+   }
+   // End Audio Object
+
+   if(rc != 0) {
+      XLOGD_ERROR("object set failed");
+   }
+
+   free(stream_params);
 }
 
 void xrsv_ws_nextgen_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_session_stats_t *stats, rdkx_timestamp_t *timestamp) {
@@ -700,7 +710,6 @@ void xrsv_ws_nextgen_handler_ws_session_end(void *data, const uuid_t uuid, xrsr_
       (*obj->handlers.session_end)(uuid, stats, timestamp, obj->user_data);
    }
 
-   obj->query_strs[0]        = NULL;
    obj->query_element_trx[0] = '\0';
 }
 

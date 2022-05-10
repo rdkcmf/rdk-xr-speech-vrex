@@ -29,8 +29,6 @@
 
 #define XRSV_WS_LAST_TIMESTAMPS_SIZE (5)
 
-#define XRSV_WS_QUERY_STRING_QTY_MAX (24)
-
 typedef struct {
    uint32_t            identifier;
    xrsv_ws_handlers_t  handlers;
@@ -40,7 +38,6 @@ typedef struct {
    json_t *            obj_stream_end;
    time_t              last_command_times[XRSV_WS_LAST_TIMESTAMPS_SIZE];
    time_t              current_command_time;
-   const char *        query_strs[XRSV_WS_QUERY_STRING_QTY_MAX];
    char                query_element_trx[41];
    char                query_element_device_id[64];
    char                query_element_device_id_xbo[64];
@@ -52,6 +49,7 @@ typedef struct {
    char                query_element_language[32];
    char                query_element_aspect_ratio[16];
    void *              user_data;
+   bool                user_initiated;
 } xrsv_ws_obj_t;
 
 bool xrsv_ws_req_mic_status(xrsv_ws_obj_t *obj, json_t *obj_json);

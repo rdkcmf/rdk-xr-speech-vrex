@@ -126,7 +126,7 @@ typedef void * xrsv_ws_object_t;
 /// @param[in] stream_params parameters which describe the stream
 /// @param[in] user_data     the data set by the user
 /// @return The function has no return value.
-typedef void (*xrsv_ws_handler_session_begin_t)(const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_session_configuration_t *configuration, xrsv_ws_stream_params_t *stream_params, rdkx_timestamp_t *timestamp, void *user_data);
+typedef void (*xrsv_ws_handler_session_begin_t)(const uuid_t uuid, xrsr_src_t src, uint32_t dst_index, xrsr_session_config_out_t *configuration, xrsv_ws_stream_params_t *stream_params, rdkx_timestamp_t *timestamp, void *user_data);
 
 /// @brief XRSV_WS session end handler
 /// @details Function type to handle session end events from the speech router.

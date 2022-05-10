@@ -27,8 +27,6 @@
 #include <jansson.h>
 #include <xrsv_ws_nextgen.h>
 
-#define XRSV_WS_NEXTGEN_QUERY_STRING_QTY_MAX (24)
-
 typedef struct {
    uint32_t                    identifier;
    xrsv_ws_nextgen_handlers_t  handlers;
@@ -45,11 +43,11 @@ typedef struct {
    json_t *                    obj_init_elements;
    json_t *                    obj_stream_end;
    json_t *                    obj_stream_end_payload;
-   const char *                query_strs[XRSV_WS_NEXTGEN_QUERY_STRING_QTY_MAX];
    char                        query_element_trx[41];
    char                        query_element_device_id[64];
    char                        query_element_version[12];
    void *                      user_data;
+   bool                        user_initiated;
 } xrsv_ws_nextgen_obj_t;
 
 bool xrsv_ws_nextgen_msgtype_conn_close(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json);
