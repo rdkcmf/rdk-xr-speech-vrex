@@ -76,6 +76,7 @@ typedef struct {
    const char *pstn;             ///< The device's phone number
    const char *language;         ///< The device's language
    bool        test_flag;        ///< True if the device is used for testing only, otherwise false
+   bool        mask_pii;         ///< True if the PII must be masked from the log
    void       *user_data;        ///< User data that is passed in to all of the callbacks
 } xrsv_ws_params_t;
 
@@ -434,6 +435,12 @@ bool xrsv_ws_update_pstn(xrsv_ws_object_t object, const char *pstn);
 /// @param[in] language Current language setting stored as a NULL-terminated string
 /// @return The function returns true for success, otherwise false.
 bool xrsv_ws_update_language(xrsv_ws_object_t object, const char *language);
+
+/// @brief Update the vrex speech request handler's PII mask
+/// @details Function used to update the mask PII option.
+/// @param[in] enable Masks PII if not false;
+/// @return The function returns true for success, otherwise false.
+bool xrsv_ws_update_mask_pii(xrsv_ws_object_t object, bool enable);
 
 /// @brief Update the vrex speech request handler's session parameters
 /// @details Function used to update session's state.

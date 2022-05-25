@@ -66,6 +66,7 @@ typedef struct {
    const char *app_id;           ///< The application identifier for HTTP requests from the client device
    const char *language;         ///< The device's language
    bool        test_flag;        ///< True if the device is used for testing only, otherwise false
+   bool        mask_pii;         ///< True if the PII must be masked from the log
    void       *user_data;        ///< User data that is passed in to all of the callbacks
 } xrsv_http_params_t;
 
@@ -235,6 +236,12 @@ bool xrsv_http_update_app_id(xrsv_http_object_t object, const char *app_id);
 /// @param[in] language Current language setting stored as a NULL-terminated string
 /// @return The function returns true for success, otherwise false.
 bool xrsv_http_update_language(xrsv_http_object_t object, const char *language);
+
+/// @brief Update the vrex speech request handler's PII mask
+/// @details Function used to update the mask PII option.
+/// @param[in] enable Masks PII if not false;
+/// @return The function returns true for success, otherwise false.
+bool xrsv_http_update_mask_pii(xrsv_http_object_t object, bool enable);
 
 /// @brief Close the vrex speech request handler
 /// @details Function used to close the vrex speech request interface.

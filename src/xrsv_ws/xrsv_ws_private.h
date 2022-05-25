@@ -49,6 +49,7 @@ typedef struct {
    char                query_element_experience[32];
    char                query_element_language[32];
    char                query_element_aspect_ratio[16];
+   bool                mask_pii;
    void *              user_data;
    bool                user_initiated;
 } xrsv_ws_obj_t;

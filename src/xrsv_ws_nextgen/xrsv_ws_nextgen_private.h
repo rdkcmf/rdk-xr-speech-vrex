@@ -47,6 +47,7 @@ typedef struct {
    char                        query_element_trx[41];
    char                        query_element_device_id[64];
    char                        query_element_version[12];
+   bool                        mask_pii;
    void *                      user_data;
    bool                        user_initiated;
    xrsr_recv_event_t           recv_event;

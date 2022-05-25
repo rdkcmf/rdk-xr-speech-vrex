@@ -313,8 +313,9 @@ xrsv_ws_nextgen_object_t xrsv_ws_nextgen_create(const xrsv_ws_nextgen_params_t *
       }
    }
 
-   obj->identifier     = XRSV_WS_NEXTGEN_IDENTIFIER;
-   obj->user_data      = params->user_data;
+   obj->identifier = XRSV_WS_NEXTGEN_IDENTIFIER;
+   obj->mask_pii   = params->mask_pii;
+   obj->user_data  = params->user_data;
 
    return(obj);
 }
@@ -486,6 +487,16 @@ bool xrsv_ws_nextgen_update_language(xrsv_ws_nextgen_object_t object, const char
    return(xrsv_ws_nextgen_update_json_str(obj->obj_init_stb, XRSV_WS_NEXTGEN_JSON_KEY_ELEMENT_LANG, language));
 }
 
+bool xrsv_ws_nextgen_update_mask_pii(xrsv_ws_nextgen_object_t object, bool enable) {
+   xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)object;
+   if(!xrsv_ws_nextgen_object_is_valid(obj)) {
+      XLOGD_ERROR("invalid object");
+      return(false);
+   }
+   obj->mask_pii = enable;
+   return(true);
+}
+
 bool xrsv_ws_nextgen_update_init_app(xrsv_ws_nextgen_object_t object, const char *blob) {
    xrsv_ws_nextgen_obj_t *obj = (xrsv_ws_nextgen_obj_t *)object;
    if(!xrsv_ws_nextgen_object_is_valid(obj)) {
@@ -525,7 +536,7 @@ bool xrsv_ws_nextgen_send_msg(xrsv_ws_nextgen_object_t object, const char *msg) 
 
    if(obj->send) {
       if(msg) {
-         XLOGD_INFO("msg <%s>", msg);
+         XLOGD_INFO("msg <%s>", obj->mask_pii ? "***" : msg);
          res = obj->send(obj->param, (const unsigned char *)msg, strlen(msg));
       } else {
          XLOGD_ERROR("msg is null...");
@@ -789,7 +800,7 @@ bool xrsv_ws_nextgen_handler_ws_connected(void *data, const uuid_t uuid, xrsr_ha
       XLOGD_ERROR("invalid message");
       return false;
    }
-   XLOGD_INFO("msg init <%s>", buffer);
+   XLOGD_INFO("msg init <%s>", obj->mask_pii ? "***" : (char *)buffer);
    
    xrsr_result_t result = (*send)(param, buffer, length);
    free(buffer);
@@ -912,7 +923,7 @@ uint64_t xrsv_ws_nextgen_time_get(void) {
 bool xrsv_ws_nextgen_msg_decode(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json) {
    if(xlog_level_active(XLOG_MODULE_ID, XLOG_LEVEL_INFO)) {
       char *str = json_dumps(obj_json, JSON_SORT_KEYS | JSON_INDENT(3));
-      XLOGD_INFO("obj \n<%s>", str ? str : "NULL");
+      XLOGD_INFO("obj \n<%s>", (str == NULL) ? "NULL" : obj->mask_pii ? "***" : str );
       if(str != NULL) {
          free(str);
       }
@@ -951,7 +962,7 @@ bool xrsv_ws_nextgen_msgtype_asr(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json) {
       final = false;
    }
 
-   XLOGD_INFO("transcription <%s>", str_tran ? str_tran : "NULL");
+   XLOGD_INFO("transcription <%s>", (str_tran == NULL) ? "NULL" : obj->mask_pii ? "***" : str_tran);
    if(obj->handlers.asr != NULL) {
       (*obj->handlers.asr)(str_tran, final, obj->user_data);
    }

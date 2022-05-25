@@ -230,6 +230,7 @@ xrsv_ws_object_t xrsv_ws_create(const xrsv_ws_params_t *params) {
    obj->obj_init       = obj_init;
    obj->obj_stream_end = obj_stream_end;
    obj->identifier     = XRSV_WS_IDENTIFIER;
+   obj->mask_pii       = params->mask_pii;
    obj->user_data      = params->user_data;
 
    return(obj);
@@ -483,6 +484,16 @@ bool xrsv_ws_update_language(xrsv_ws_object_t object, const char *language) {
       }
    }
    return(rv);
+}
+
+bool xrsv_ws_update_mask_pii(xrsv_ws_object_t object, bool enable) {
+   xrsv_ws_obj_t *obj = (xrsv_ws_obj_t *)object;
+   if(!xrsv_ws_object_is_valid(obj)) {
+      XLOGD_ERROR("invalid object");
+      return(false);
+   }
+   obj->mask_pii = enable;
+   return(true);
 }
 
 bool xrsv_ws_update_session_params(xrsv_ws_object_t object, const char *call_state) {
@@ -826,7 +837,7 @@ uint64_t xrsv_ws_time_get(void) {
 bool xrsv_ws_msg_decode(xrsv_ws_obj_t *obj, json_t *obj_json) {
    if(xlog_level_active(XLOG_MODULE_ID, XLOG_LEVEL_INFO)) {
       char *str = json_dumps(obj_json, JSON_SORT_KEYS | JSON_INDENT(3));
-      XLOGD_INFO("obj \n<%s>", str ? str : "NULL");
+      XLOGD_INFO("obj \n<%s>", (str == NULL) ? "NULL" : obj->mask_pii ? "***" : str);
       if(str != NULL) {
          free(str);
       }
@@ -879,7 +890,7 @@ bool xrsv_ws_req_processing(xrsv_ws_obj_t *obj, json_t *obj_json) {
       str_tran = json_string_value(obj_tran);
    }
 
-   XLOGD_INFO("transcription <%s>", str_tran ? str_tran : "NULL");
+   XLOGD_INFO("transcription <%s>", (str_tran == NULL) ? "NULL" : obj->mask_pii ? "***" : str_tran);
    if(obj->handlers.processing != NULL) {
       (*obj->handlers.processing)(str_tran, obj->user_data);
    }
@@ -999,7 +1010,7 @@ void xrsv_ws_act_phone_call_start(xrsv_ws_obj_t *obj, json_t *obj_json) {
       str_url = json_string_value(obj_url);
    }
 
-   XLOGD_INFO("phone number <%s> transcription <%s> tts audio url <%s>", str_number ? str_number : "NULL", str_trans ? str_trans : "NULL", str_url ? str_url : "NULL");
+   XLOGD_INFO("phone number <%s> transcription <%s> tts audio url <%s>", (str_number == NULL) ? "NULL" : obj->mask_pii ? "***" : str_number, (str_trans == NULL) ? "NULL" : obj->mask_pii ? "***" : str_trans, (str_url == NULL) ? "NULL" : obj->mask_pii ? "***" : str_url);
    if(obj->handlers.phone_call_start != NULL) {
       (*obj->handlers.phone_call_start)(obj_number, obj_trans, obj_url, obj->user_data);
    }
@@ -1034,7 +1045,7 @@ void xrsv_ws_act_notify(xrsv_ws_obj_t *obj, json_t *obj_json) {
       str_url = json_string_value(obj_url);
    }
 
-   XLOGD_INFO("tts audio url <%s>", str_url ? str_url : "NULL");
+   XLOGD_INFO("tts audio url <%s>", (str_url == NULL) ? "NULL" : obj->mask_pii ? "***" : str_url);
    if(str_url != NULL && obj->handlers.notify != NULL) {
       (*obj->handlers.notify)(obj_url, obj->user_data);
    }

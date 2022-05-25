@@ -68,6 +68,7 @@ typedef struct {
    const char *language;         ///< The device's language
    const char *device_mac;       ///< The device's MAC address
    bool        test_flag;        ///< True if the device is used for testing only, otherwise false
+   bool        mask_pii;         ///< True if the PII must be masked from the log
    void       *user_data;        ///< User data that is passed in to all of the callbacks
 } xrsv_ws_nextgen_params_t;
 
@@ -349,6 +350,12 @@ bool xrsv_ws_nextgen_update_audio_model(xrsv_ws_nextgen_object_t object, const c
 /// @param[in] language Current language setting stored as a NULL-terminated string
 /// @return The function returns true for success, otherwise false.
 bool xrsv_ws_nextgen_update_language(xrsv_ws_nextgen_object_t object, const char *language);
+
+/// @brief Update the vrex speech request handler's PII mask
+/// @details Function used to update the mask PII option.
+/// @param[in] enable Masks PII if not false;
+/// @return The function returns true for success, otherwise false.
+bool xrsv_ws_nextgen_update_mask_pii(xrsv_ws_nextgen_object_t object, bool enable);
 
 /// @brief Update application init blob
 /// @details Function used to update the application blob in the init message

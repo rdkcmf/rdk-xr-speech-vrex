@@ -47,6 +47,7 @@ typedef struct {
    char                 query_element_language[32];
    char                 query_element_aspect_ratio[16];
    char                 query_element_vrex_filters[40];
+   bool                 mask_pii;
    void *               user_data;
 } xrsv_http_obj_t;
 
@@ -107,6 +108,7 @@ xrsv_http_object_t xrsv_http_create(const xrsv_http_params_t *params) {
       XLOGD_WARN("truncated aspect ratio <%d>", rc);
    }
 
+   obj->mask_pii  = params->mask_pii;
    obj->user_data = params->user_data;
 
    return(obj);
@@ -241,6 +243,16 @@ bool xrsv_http_update_language(xrsv_http_object_t object, const char *language) 
       rv = true;
    }
    return(rv);
+}
+
+bool xrsv_http_update_mask_pii(xrsv_http_object_t object, bool enable) {
+   xrsv_http_obj_t *obj = (xrsv_http_obj_t *)object;
+   if(!xrsv_http_object_is_valid(obj)) {
+      XLOGD_ERROR("invalid object");
+      return(false);
+   }
+   obj->mask_pii = enable;
+   return(true);
 }
 
 void xrsv_http_destroy(xrsv_http_object_t object) {
