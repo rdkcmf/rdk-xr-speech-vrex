@@ -21,6 +21,7 @@
 #ifndef __XRSV_WS_PRIVATE__
 #define __XRSV_WS_PRIVATE__
 
+#include <stddef.h>
 #include <bsd/string.h>
 #include <errno.h>
 #include <rdkx_logger.h>
@@ -78,8 +79,8 @@ typedef bool (*xrsv_ws_handler_bool_t)(xrsv_ws_obj_t *obj, json_t *obj_json);
 typedef struct xrsv_ws_request_handler_s { char *name; xrsv_ws_handler_bool_t func; } xrsv_ws_request_handler_t;
 typedef struct xrsv_ws_action_handler_s  { char *name; xrsv_ws_handler_void_t func; } xrsv_ws_action_handler_t;
 
-struct xrsv_ws_request_handler_s * xrsv_ws_request_handler_get(const char *str, unsigned int len);
-struct xrsv_ws_action_handler_s *  xrsv_ws_action_handler_get(const char *str, unsigned int len);
-struct xrsv_ws_action_handler_s *  xrsv_ws_action_phone_handler_get(const char *str, unsigned int len);
+struct xrsv_ws_request_handler_s * xrsv_ws_request_handler_get(const char *str, size_t len);
+struct xrsv_ws_action_handler_s *  xrsv_ws_action_handler_get(const char *str, size_t len);
+struct xrsv_ws_action_handler_s *  xrsv_ws_action_phone_handler_get(const char *str, size_t len);
 
 #endif

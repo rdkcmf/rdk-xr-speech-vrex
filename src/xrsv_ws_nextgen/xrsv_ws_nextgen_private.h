@@ -21,6 +21,7 @@
 #ifndef __XRSV_WS_NEXTGEN_PRIVATE__
 #define __XRSV_WS_NEXTGEN_PRIVATE__
 
+#include <stddef.h>
 #include <bsd/string.h>
 #include <errno.h>
 #include <rdkx_logger.h>
@@ -75,7 +76,7 @@ typedef void (*xrsv_ws_nextgen_handler_void_t)(xrsv_ws_nextgen_obj_t *obj, json_
 typedef struct xrsv_ws_nextgen_msgtype_handler_s { char *name; xrsv_ws_nextgen_handler_bool_t func; } xrsv_ws_nextgen_msgtype_handler_t;
 typedef struct xrsv_ws_nextgen_tv_control_handler_s { char *name; xrsv_ws_nextgen_handler_void_t func; } xrsv_ws_nextgen_tv_control_handler_t;
 
-struct xrsv_ws_nextgen_msgtype_handler_s * xrsv_ws_nextgen_msgtype_handler_get(const char *str, unsigned int len);
-struct xrsv_ws_nextgen_tv_control_handler_s * xrsv_ws_nextgen_tv_control_handler_get(const char *str, unsigned int len);
+struct xrsv_ws_nextgen_msgtype_handler_s * xrsv_ws_nextgen_msgtype_handler_get(const char *str, size_t len);
+struct xrsv_ws_nextgen_tv_control_handler_s * xrsv_ws_nextgen_tv_control_handler_get(const char *str, size_t len);
 
 #endif
