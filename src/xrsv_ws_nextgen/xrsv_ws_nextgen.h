@@ -87,9 +87,9 @@ typedef struct {
    uint32_t     keyword_sample_begin;               ///< The offset in samples from the beginning of the buffered audio to the beginning of the keyword
    uint32_t     keyword_sample_end;                 ///< The offset in samples from the beginning of the buffered audio to the end of the keyword
    uint16_t     keyword_doa;                        ///< The direction of arrival in degrees (0-359)
-   uint16_t     keyword_sensitivity;                ///<
+   double       keyword_sensitivity;                ///<
    uint16_t     keyword_sensitivity_triggered;      ///<
-   uint16_t     keyword_sensitivity_high;           ///<
+   double       keyword_sensitivity_high;           ///<
    bool         keyword_sensitivity_high_support;   ///<
    bool         keyword_sensitivity_high_triggered; ///<
    double       keyword_gain;                       ///< The gain applied to the audio at the input of the keyword detector

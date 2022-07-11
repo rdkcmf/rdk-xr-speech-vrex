@@ -567,9 +567,9 @@ void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t 
       stream_params.keyword_sample_begin               = detector_result->offset_kwd_begin - detector_result->offset_buf_begin;
       stream_params.keyword_sample_end                 = detector_result->offset_kwd_end   - detector_result->offset_buf_begin;
       stream_params.keyword_doa                        = detector_result->doa;
-      stream_params.keyword_sensitivity                = 0;
+      stream_params.keyword_sensitivity                = 0.0;
       stream_params.keyword_sensitivity_triggered      = false;
-      stream_params.keyword_sensitivity_high           = 0;
+      stream_params.keyword_sensitivity_high           = 0.0;
       stream_params.keyword_sensitivity_high_support   = false;
       stream_params.keyword_sensitivity_high_triggered = false;
       stream_params.keyword_gain                       = detector_result->kwd_gain;
