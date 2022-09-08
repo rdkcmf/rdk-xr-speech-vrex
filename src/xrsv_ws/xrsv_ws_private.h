@@ -52,6 +52,7 @@ typedef struct {
    bool                mask_pii;
    void *              user_data;
    bool                user_initiated;
+   uuid_t              uuid;
 } xrsv_ws_obj_t;
 
 bool xrsv_ws_req_mic_status(xrsv_ws_obj_t *obj, json_t *obj_json);

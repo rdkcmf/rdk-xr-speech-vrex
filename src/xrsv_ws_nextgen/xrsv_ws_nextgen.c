@@ -612,6 +612,7 @@ void xrsv_ws_nextgen_handler_ws_session_begin(void *data, const uuid_t uuid, xrs
    }
 
    obj->user_initiated = config_out->user_initiated;
+   uuid_copy(obj->uuid, uuid);
 
    if(obj->handlers.session_begin != NULL) {
       (*obj->handlers.session_begin)(uuid, src, dst_index, config_out, (detector_result == NULL) ? NULL : &stream_params, timestamp, obj->user_data);
@@ -1055,7 +1056,7 @@ bool xrsv_ws_nextgen_msgtype_wuw_verification(xrsv_ws_nextgen_obj_t *obj, json_t
             confidence = json_integer_value(obj_confidence);
          }
       }
-      obj->handlers.wuw_verification(passed, confidence, obj->user_data);
+      obj->handlers.wuw_verification(obj->uuid, passed, confidence, obj->user_data);
    }
    return(false);
 }

@@ -185,7 +185,7 @@ typedef void (*xrsv_ws_handler_sent_init_t)(const uuid_t uuid, rdkx_timestamp_t 
 /// @details Function type to handle listening events during the session.
 /// @param[in] user_data     the data set by the user
 /// @return The function has no return value.
-typedef void (*xrsv_ws_handler_listening_t)(void *user_data);
+typedef void (*xrsv_ws_handler_listening_t)(const uuid_t uuid, void *user_data);
 
 /// @brief XRSV_WS processing handler
 /// @details Function type to handle processing events during the session.

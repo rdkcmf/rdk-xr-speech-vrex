@@ -51,6 +51,7 @@ typedef struct {
    void *                      user_data;
    bool                        user_initiated;
    xrsr_recv_event_t           recv_event;
+   uuid_t                      uuid;
 } xrsv_ws_nextgen_obj_t;
 
 bool xrsv_ws_nextgen_msgtype_conn_close(xrsv_ws_nextgen_obj_t *obj, json_t *obj_json);

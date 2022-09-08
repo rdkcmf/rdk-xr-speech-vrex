@@ -49,15 +49,15 @@ CLEANFILES    = xrsv_version.h                                      \
                 xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.c           \
                 xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.c
 
-xrsv_ws/xrsv_ws_request.c:
+xrsv_ws/xrsv_ws_request.c: xrsv_ws/xrsv_ws_request.hash
 	${STAGING_BINDIR_NATIVE}/gperf --output-file=$(srcdir)/xrsv_ws/xrsv_ws_request.c $(srcdir)/xrsv_ws/xrsv_ws_request.hash
-xrsv_ws/xrsv_ws_action.c:
+xrsv_ws/xrsv_ws_action.c: xrsv_ws/xrsv_ws_action.hash
 	${STAGING_BINDIR_NATIVE}/gperf --output-file=$(srcdir)/xrsv_ws/xrsv_ws_action.c $(srcdir)/xrsv_ws/xrsv_ws_action.hash
-xrsv_ws/xrsv_ws_action_phone.c:
+xrsv_ws/xrsv_ws_action_phone.c: xrsv_ws/xrsv_ws_action_phone.hash
 	${STAGING_BINDIR_NATIVE}/gperf --output-file=$(srcdir)/xrsv_ws/xrsv_ws_action_phone.c $(srcdir)/xrsv_ws/xrsv_ws_action_phone.hash
-xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.c:
+xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.c: xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.hash
 	${STAGING_BINDIR_NATIVE}/gperf --output-file=$(srcdir)/xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.c $(srcdir)/xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.hash
-xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.c:
+xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.c: xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.hash
 	${STAGING_BINDIR_NATIVE}/gperf --output-file=$(srcdir)/xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.c $(srcdir)/xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.hash
 
 # Create perfect hash .c file from .hash files

@@ -19,4 +19,9 @@ ltmain.sh
 m4/
 missing
 src/Makefile.in
+src/xrsv_ws/xrsv_ws_action.c
+src/xrsv_ws/xrsv_ws_action_phone.c
+src/xrsv_ws/xrsv_ws_request.c
+src/xrsv_ws_nextgen/xrsv_ws_nextgen_msgtype.c
+src/xrsv_ws_nextgen/xrsv_ws_nextgen_tv_control.c
 

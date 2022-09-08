@@ -581,6 +581,7 @@ void xrsv_ws_handler_ws_session_begin(void *data, const uuid_t uuid, xrsr_src_t 
    }
 
    obj->user_initiated = config_out->user_initiated;
+   uuid_copy(obj->uuid, uuid);
 
    if(obj->handlers.session_begin != NULL) {
       (*obj->handlers.session_begin)(uuid, src, dst_index, config_out, (detector_result == NULL) ? NULL : &stream_params, timestamp, obj->user_data);
@@ -903,7 +904,7 @@ bool xrsv_ws_req_processing(xrsv_ws_obj_t *obj, json_t *obj_json) {
 bool xrsv_ws_req_listening(xrsv_ws_obj_t *obj, json_t *obj_json) {
    XLOGD_INFO("");
    if(obj->handlers.listening != NULL) {
-      (*obj->handlers.listening)(obj->user_data);
+      (*obj->handlers.listening)(obj->uuid, obj->user_data);
    }
    return(false);
 }

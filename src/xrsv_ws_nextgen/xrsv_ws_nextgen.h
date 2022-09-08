@@ -212,7 +212,7 @@ typedef void (*xrsv_ws_nextgen_handler_response_vrex_t)(long ret_code, void *use
 /// @param[in] confidence the confidence value from the cloud
 /// @param[in] user_data     the data set by the user
 /// @return The function has no return value.
-typedef void (*xrsv_ws_nextgen_handler_wuw_verification_t)(bool passed, long confidence, void *user_data);
+typedef void (*xrsv_ws_nextgen_handler_wuw_verification_t)(const uuid_t uuid, bool passed, long confidence, void *user_data);
 
 /// @brief XRSV_WS_NEXTGEN msg handler
 /// @details Function type to handle raw messages from the server.
